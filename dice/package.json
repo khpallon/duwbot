@@ -1,0 +1,25 @@
+{
+  "name": "bot.js",
+  "version": "1.0.0",
+  "description": "twitch dicebot",
+  "main": "bot.js",
+  "scripts": {
+    "test": "hello"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khpallon/duwbot.git"
+  },
+  "keywords": [
+    "twitch"
+  ],
+  "author": "khpallon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/khpallon/duwbot/issues"
+  },
+  "homepage": "https://github.com/khpallon/duwbot#readme",
+  "dependencies": {
+    "tmi.js": "^1.8.5"
+  }
+}
