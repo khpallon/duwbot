@@ -11,6 +11,8 @@ const opts = {
   ]
 };
 
+let anser = []
+
 // Create a client with our options
 const client = new tmi.client(opts);
 
@@ -25,11 +27,9 @@ client.connect();
 function onMessageHandler (target, context, msg, self) {
   if (self) { return; } // Ignore messages from the bot
 
-  var anser = []
   // Remove whitespace from chat message
   const commandName = msg.trim();
   console.log(msg.trim() === anser)
-  console.log(anser)
   console.log(msg)
 
   // If the command is known, let's execute it
@@ -37,15 +37,23 @@ function onMessageHandler (target, context, msg, self) {
     const num = rollDice();
     client.say(target, `You rolled a ${num}`);
     console.log(`* Executed ${commandName} command`);
+
   } else if (commandName === '!quiz') {
+
     var [eq, ans] = equation();
     anser.push(ans)
+    console.log(anser[0])
     client.say(target, `Solve this equation!: ${eq}`); 
-   } else if (msg === anser[0]){
+
+   } else if (parseInt(msg) === anser[0]){
+
     client.say(target, `Correct answer!`)
     anser = []
+
    } else {
+
     console.log(`* Unknown command ${commandName}`);
+
   }
 }
 
