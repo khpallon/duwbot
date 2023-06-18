@@ -11,6 +11,8 @@ const opts = {
 };
 
 let anser = []
+let timeout = false
+let timing
 
 // Create a client with our options
 const client = new tmi.client(opts);
@@ -22,12 +24,6 @@ client.on('connected', onConnectedHandler);
 // Connect to Twitch:
 client.connect();
 
-client.on('connected', (channel, tags, message, self) => {
-	// "Alca: Hello, World!"
-	console.log(`hor`);
-});
-
-
 // Called every time a message comes in
 function onMessageHandler (target, context, msg, self) {
   if (self) { return; } // Ignore messages from the bot
@@ -37,14 +33,33 @@ function onMessageHandler (target, context, msg, self) {
 
    if (commandName === '!quiz') {
 
+    if (timeout) {
+      client.say(target, `Please wait before running the !quiz command again.`);
+      return;
+    }
+
     var [eq, ans] = equation();
     anser.push(ans)
     client.say(target, `Solve this equation!: ${eq}`); 
 
+    timing = setTimeout(() => {
+    client.say(target, `No one answered correctly! The answer was: ${anser}`)
+    anser = []
+   }, 5000) /* <--------- ANSWERING TIMEOUT */
+
+   timeout = true
+
+   setTimeout(() => {
+    timeout = false
+   }, 10000) /* <--------- QUIZ TIMEOUT */
+
    } else if (parseInt(msg) === anser[0]){
 
-    client.say(target, `${context['display-name']} solved the equation!`)
+    client.say(target, `The equation was solved by: ${context['display-name']}`)
+    clearTimeout(timing)
+    timing = null
     anser = []
+    
 
    }
 }
