@@ -1,4 +1,20 @@
 const tmi = require('tmi.js');
+const sqlite3 = require('sqlite3').verbose();
+
+let db = new sqlite3.Database('./chatUsers.db', sqlite3.OPEN_READWRITE, (err) => {
+  if (err) {
+    return console.error(err.message);
+  }
+  console.log('Connected to the in-memory SQlite database.');
+});
+
+/* db.run('CREATE TABLE users(username)');
+ */
+sql = `INSERT INTO users(username) VALUES (?)`;
+
+db.run(sql, ['dog'], (err)=>{
+  if(err) console.error(err);
+});
 
 const opts = {
   identity: {
@@ -31,7 +47,9 @@ function onMessageHandler (target, context, msg, self) {
   // Remove whitespace from chat message
   const commandName = msg.trim();
 
+
    if (commandName === '!quiz') {
+    console.log(db.version())
 
     if (timeout) {
       client.say(target, `Please wait before running the !quiz command again.`);
@@ -75,3 +93,5 @@ const equation = () => {
 function onConnectedHandler (addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
 }
+
+db.close();
