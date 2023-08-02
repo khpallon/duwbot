@@ -1,5 +1,7 @@
 const tmi = require('tmi.js');
 const sqlite3 = require('sqlite3').verbose();
+let sql
+
 
 let db = new sqlite3.Database('./chatUsers.db', sqlite3.OPEN_READWRITE, (err) => {
   if (err) {
@@ -8,13 +10,15 @@ let db = new sqlite3.Database('./chatUsers.db', sqlite3.OPEN_READWRITE, (err) =>
   console.log('Connected to the in-memory SQlite database.');
 });
 
-/* db.run('CREATE TABLE users(username)');
- */
-sql = `INSERT INTO users(username) VALUES (?)`;
+/* sql = `CREATE TABLE users(id INTEGER PRIMARY KEY,username,points)` */
 
-db.run(sql, ['dog'], (err)=>{
-  if(err) console.error(err);
-});
+/* db.run("DROP TABLE users"); */
+
+
+/* IDEA FOR TOO SLOW DB ADDING!!!!!!!!!!!! 
+MAKE IT SO PEOPLE COULD ALSO TYPE !ADDME THEN IT WILL AUTOMATICALLY ADD THEM */
+
+
 
 const opts = {
   identity: {
@@ -35,7 +39,30 @@ const client = new tmi.client(opts);
 
 // Register our event handlers (defined below)
 client.on('message', onMessageHandler);
+
 client.on('connected', onConnectedHandler);
+
+client.on("join", (channel, username, self) => {
+
+  sql = `INSERT INTO users(username,points) VALUES (?,0)`
+  db.run(sql,[username],(err)=>{
+    if (err) return console.error(err.message)
+  });
+  sql = `SELECT * FROM users;`;
+  db.all(sql, [], (err, rows) => {
+    if (err) return console.error(err.message);
+    rows.forEach(row =>{
+      console.log(row)
+    })
+  })
+});
+
+
+
+
+/* client.on("part", (channel, username, self) => {
+  console.log(username)
+}); */
 
 // Connect to Twitch:
 client.connect();
@@ -47,9 +74,10 @@ function onMessageHandler (target, context, msg, self) {
   // Remove whitespace from chat message
   const commandName = msg.trim();
 
-
+/*   console.log(target)
+ */
    if (commandName === '!quiz') {
-    console.log(db.version())
+
 
     if (timeout) {
       client.say(target, `Please wait before running the !quiz command again.`);
@@ -80,18 +108,41 @@ function onMessageHandler (target, context, msg, self) {
     
 
    }
+
+   if (commandName === '!coinflip') {
+    if (timeout) {
+      client.say(target, `Please wait before running the !coinflip command again.`);
+      return;
+    }
+    if (Math.round(Math.random()) > 0) {
+      client.say(target, `Tails!`)
+      timeout = true
+      setTimeout(() => {
+        timeout = false
+       }, 10000)
+    } else {
+      client.say(target, `Heads!`)
+      timeout = true
+      setTimeout(() => {
+        timeout = false
+       }, 10000)
+    }
+ 
+   }
 }
 
 
 const equation = () => {
-    var first = Math.floor(Math.random() * 10)
-    var second = Math.floor(Math.random() * 10)
+    var first = Math.floor(Math.random() * 15)
+    var second = Math.floor(Math.random() * 15)
     return [`${first} * ${second}`, first * second]
 }
 
 // Called every time the bot connects to Twitch chat
 function onConnectedHandler (addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
+/*   client.say("#duwinz",`Hi Chat. I am Live!`)
+ */
 }
 
-db.close();
+/* db.close(); */
