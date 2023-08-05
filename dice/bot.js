@@ -10,7 +10,8 @@ let db = new sqlite3.Database('./chatUsers.db', sqlite3.OPEN_READWRITE, (err) =>
   console.log('Connected to the in-memory SQlite database.');
 });
 
-/* sql = `CREATE TABLE users(id INTEGER PRIMARY KEY,username,points)` */
+/* sql = `CREATE TABLE users(id INTEGER PRIMARY KEY,username,points)`
+db.run(sql); */
 
 /* db.run("DROP TABLE users"); */
 
@@ -43,18 +44,7 @@ client.on('message', onMessageHandler);
 client.on('connected', onConnectedHandler);
 
 client.on("join", (channel, username, self) => {
-
-  sql = `INSERT INTO users(username,points) VALUES (?,0)`
-  db.run(sql,[username],(err)=>{
-    if (err) return console.error(err.message)
-  });
-  sql = `SELECT * FROM users;`;
-  db.all(sql, [], (err, rows) => {
-    if (err) return console.error(err.message);
-    rows.forEach(row =>{
-      console.log(row)
-    })
-  })
+  noDoubles(username) 
 });
 
 
@@ -129,6 +119,14 @@ function onMessageHandler (target, context, msg, self) {
     }
  
    }
+
+   if (commandName === '!addme') {
+    if (timeout) {
+      client.say(target, `Please wait before running the !addme command again.`);
+      return;
+    }
+    noDoubles(context['display-name'])
+   }
 }
 
 
@@ -143,6 +141,32 @@ function onConnectedHandler (addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
 /*   client.say("#duwinz",`Hi Chat. I am Live!`)
  */
+}
+
+function addingToDB(username) {
+  sql = `INSERT INTO users(username,points) VALUES (?,0)`
+  db.run(sql,[username],(err)=>{
+    if (err) return console.error(err.message)
+  });
+  
+}
+function noDoubles(username) {
+  let dingdingding = false
+  sql = `SELECT username FROM users;`;
+  db.all(sql, [], (err, rows) => {
+    if (err) return console.error(err.message);
+    console.log(rows)
+   for (var row = 0; row < rows.length; row++){
+    if (rows[row].username === username) {
+      console.log('ive been here beforne')
+      dingdingding = true
+      break
+    }
+   }
+   if (!dingdingding) {
+      addingToDB(username)
+   }
+  })
 }
 
 /* db.close(); */
